@@ -1,0 +1,20 @@
+                               precision    recall  f1-score   support
+
+            Actinic keratoses       0.58      0.57      0.57        88
+         Basal cell carcinoma       0.76      0.89      0.82       333
+Benign keratosis-like lesions       0.62      0.75      0.68       263
+                   Chickenpox       0.94      0.97      0.96       113
+                       Cowpox       1.00      0.99      0.99        99
+               Dermatofibroma       0.61      0.76      0.68        25
+                         HFMD       0.99      0.99      0.99       242
+                      Healthy       1.00      0.98      0.99       171
+                      Measles       0.96      0.99      0.98        83
+             Melanocytic nevi       0.91      0.81      0.86      1288
+                     Melanoma       0.65      0.66      0.66       453
+                    Monkeypox       0.99      0.98      0.98       426
+      Squamous cell carcinoma       0.61      0.75      0.67        64
+             Vascular lesions       0.74      0.96      0.83        26
+
+                     accuracy                           0.84      3674
+                    macro avg       0.81      0.86      0.83      3674
+                 weighted avg       0.85      0.84      0.84      3674
