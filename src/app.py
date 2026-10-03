@@ -34,8 +34,12 @@ def predict(image):
     input_tensor = eval_transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        output = model(input_tensor)
-        probabilities = torch.softmax(output, dim=1)[0]
+        # Version 1: the normal image
+        out_normal = model(input_tensor)
+        # Version 2: flipped left-right
+        out_flip = model(torch.flip(input_tensor, dims=[3]))
+        # Test-Time Augmentation: average the two sets of probabilities
+        probabilities = (torch.softmax(out_normal, dim=1) + torch.softmax(out_flip, dim=1))[0] / 2
 
     results = {CLASSES[i]: float(probabilities[i]) for i in range(NUM_CLASSES)}
     return results
@@ -45,7 +49,7 @@ demo = gr.Interface(
     inputs=gr.Image(type="pil", label="Upload a skin lesion image"),
     outputs=gr.Label(num_top_classes=3, label="Prediction"),
     title="Skin Lesion Classifier",
-    description="Upload a photo of a skin lesion to classify it into one of 14 conditions. (ResNet-18, fine-tuned)"
+    description="Upload a photo of a skin lesion to classify it into one of 14 conditions. (ResNet-18, fine-tuned, with flip test-time augmentation)"
 )
 
 demo.launch()
