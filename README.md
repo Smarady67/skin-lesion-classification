@@ -139,8 +139,7 @@ pip install -r requirements.txt
 ### 3. Test a trained model locally (outside Colab)
 Download the fine-tuned checkpoint and place it at `results/checkpoints/resnet_finetuned_best.pth`:
 
-**Model weights (134 MB, too large for GitHub):** PASTE_DRIVE_LINK_HERE
-
+**Model weights (134 MB, too large for GitHub):** https://drive.google.com/file/d/1HiLTkLZAE2DDiKOJbMNi2gTtT2qbfCBI/view?usp=sharing
 Then set `IMAGE_PATH` in the script and run:
 ```bash
 python src/test_model.py
