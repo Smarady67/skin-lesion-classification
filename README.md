@@ -3,7 +3,7 @@
 ## Author
 **Sokha Marady**  
 Batch 13 Software Engineering | Deep Learning Final Project  
-Lecturer: Mr. Soklong HIM | Academic Year: 2026 – 2027
+Lecturer: Mr. Soklong HIM |
 
 ## Problem Statement
 **Task:** multi-class image classification. **Input:** a photo of a skin lesion or skin disease (RGB image, resized to 224x224). **Output:** one of 14 diagnostic classes.
@@ -50,7 +50,7 @@ Three distinct approaches (they differ in architecture and/or training strategy)
 * **Optimizer:** Adam, with a ReduceLROnPlateau learning-rate scheduler
 * **Batch size / input size:** 32 / 224x224
 * **Loss:** weighted cross-entropy
-* **Random seed:** 42 (Python, NumPy and PyTorch are all seeded)
+* **Random seed:** 42
 * **Checkpointing:** `torch.save` / `torch.load`; the best checkpoint is chosen by lowest validation loss
 * **Hardware:** Tesla T4 GPU (Google Colab)
 
@@ -89,20 +89,25 @@ Macro-F1 is the main metric because the classes are heavily imbalanced; plain ac
 ![Misclassified examples](results/figures/misclassified_examples.png)
 
 ### Hyperparameter Tuning
-Tuned on the best approach (fine-tuned ResNet-18), 3 epochs per configuration, scored by validation macro-F1. Saved in `results/hyperparameter_tuning.csv`.
+Tuned on the best approach (fine-tuned ResNet-18), scored by validation macro-F1 at epoch 3. Saved in `results/hyperparameter_tuning.csv`.
 
-| Learning rate | Weight decay | Val Macro-F1 |
+| Learning rate | Weight decay | Validation macro-F1 (epoch 3) |
 | :--- | :--- | :--- |
-| **1e-4** | **1e-4** | **0.722 (best, used for final training)** |
-| 1e-4 | 0.0 | 0.697 |
+| 1e-4 (chosen) | 1e-4 | 0.722 |
+| 5e-5 | 1e-4 | 0.728 |
 | 1e-5 | 1e-4 | 0.650 |
+| 5e-6 | 1e-4 | 0.590 |
+| 1e-6 | 1e-4 | 0.386 |
+| 1e-4 | 0 | 0.697 |
+
+Smaller learning rates (5e-5, 5e-6, 1e-6) were tested after feedback; they did not improve on 1e-4. Full results: results/hyperparameter_tuning.csv and results/hyperparameter_tuning_smaller_lr.csv. Each setting was run once (single seed), so small differences are within noise.
 
 ## Discussion & Error Analysis
 **Why fine-tuning won.** The frozen ResNet-18 (Macro-F1 0.54) barely beat the scratch CNN (0.52), while full fine-tuning reached 0.83. ImageNet features alone transfer poorly to dermatology images because of the domain gap (natural objects vs. skin textures). Unfreezing lets the network adapt its features to the task, and pretraining gives it a far better starting point than random initialization. The scratch CNN is limited by capacity and by the amount of data.
 
 **Per-class errors (fine-tuned model).** Viral and healthy classes are easy and distinct (Cowpox, HFMD, Healthy, Monkeypox, Measles all F1 ≥ 0.98; Chickenpox 0.96). The weak classes are visually similar and have few samples: Actinic keratoses (0.57), Melanoma (0.66), Squamous cell carcinoma (0.67), Dermatofibroma (0.68) and Benign keratosis-like lesions (0.68). These share similar colors, textures and borders, and even with weighted loss there are too few training samples to learn clean decision boundaries. See the confusion matrix and misclassified examples above.
 
-**Extra finding: ensembling.** Averaging the probabilities of all three models did not help. The weak CNN diluted the strong fine-tuned model (on one test image: fine-tuned alone 99.62%, ensemble 56.68%). Ensembling works best when the models have similar skill; here their Macro-F1 values were 0.52, 0.54 and 0.83.
+**Extra finding: ensembling.** In an informal check, averaging the probabilities of all three models did not help. The weak CNN diluted the strong fine-tuned model (on one example photo downloaded from the internet, not from the test set: fine-tuned alone 99.62%, ensemble 56.68%; this was an informal check, not a full test-set result). Ensembling works best when the models have similar skill; here their Macro-F1 values were 0.52, 0.54 and 0.83.
 
 **Demo extra (not part of the official results).** The Gradio demo uses flip test-time augmentation (the normal image and its mirror image, with probabilities averaged). It was not applied to the official test results, so the comparison stays fair.
 
@@ -140,6 +145,7 @@ pip install -r requirements.txt
 Download the fine-tuned checkpoint and place it at `results/checkpoints/resnet_finetuned_best.pth`:
 
 **Model weights (134 MB, too large for GitHub):** https://drive.google.com/file/d/1HiLTkLZAE2DDiKOJbMNi2gTtT2qbfCBI/view?usp=sharing
+
 Then set `IMAGE_PATH` in the script and run:
 ```bash
 python src/test_model.py
